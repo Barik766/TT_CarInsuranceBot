@@ -2,6 +2,9 @@
 
 CarInsuranceBot is a Telegram bot that automates car insurance registration using a step-by-step workflow. It leverages OCR (Mindee) for document data extraction and OpenAI for generating custom responses such as the insurance policy number.
 
+🔗 Live Bot
+👉 [Try the bot on Telegram](https://t.me/CarInsuranceTest_Bot)
+
 ---
 
 ## 🛠️ Tech Stack
@@ -101,5 +104,4 @@ On Render, set the following environment variables under "Environment → Secret
   }
 }
 
-🔗 Live Bot
-👉 [Try the bot on Telegram](https://t.me/CarInsuranceTest_Bot)
+
