@@ -1,4 +1,4 @@
-# Автоматический Dockerfile
+# Dockerfile для использования с solution файлом
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
@@ -10,22 +10,28 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем все файлы
+# Копируем solution файл и все csproj файлы
+COPY *.sln ./
+COPY CarInsuranceBot/*.csproj ./CarInsuranceBot/
+COPY CarInsuranceBot.Core/*.csproj ./CarInsuranceBot.Core/
+COPY CarInsuranceBot.Infrastructure/*.csproj ./CarInsuranceBot.Infrastructure/
+COPY CarInsuranceBot.Application/*.csproj ./CarInsuranceBot.Application/
+
+# Восстанавливаем зависимости
+RUN dotnet restore
+
+# Копируем остальные файлы
 COPY . .
 
-# Восстанавливаем и собираем все проекты
-RUN dotnet restore
-RUN dotnet build -c $BUILD_CONFIGURATION
+# Собираем решение
+RUN dotnet build -c $BUILD_CONFIGURATION --no-restore
 
 FROM build AS publisher
 ARG BUILD_CONFIGURATION=Release
-# Публикуем основной проект (CarInsuranceBot)
-WORKDIR "/src/CarInsuranceBot"
-RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+# Публикуем основной проект
+RUN dotnet publish "CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publisher /app/publish .
-
-# Автоматический поиск и запуск DLL
-CMD ["sh", "-c", "dotnet $(find . -name '*.dll' -not -path './ref/*' | head -1)"]
+ENTRYPOINT ["dotnet", "CarInsuranceBot.dll"]
