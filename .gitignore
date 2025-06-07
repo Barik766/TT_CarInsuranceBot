@@ -1,0 +1,77 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build результаты
+bin/
+obj/
+
+# Пакеты
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+.nuget/
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+
+# Конфигурации локального пользователя
+*.local
+
+# Сборка Rider
+.idea/
+
+# Файлы publish
+publish/
+
+# Файлы настроек тестов
+TestResults/
+
+# Папка с настройками JetBrains Rider
+.idea/
+
+# ОС
+.DS_Store
+Thumbs.db
+
+# Кэш файлов Visual Studio Code
+.vscode/
+
+# Файлы лицензий пакетов
+*.license
+
+# Файлы ключей
+*.pfx
+*.snk
+
+# Скрытые файлы, создаваемые ОС
+._*
+
+# Файлы пакетов
+*.vsix
+
+# Папка с профилями отладки
+.vscode/
+
+# Папка с временными файлами от Rider
+.idea/
+
+# Логи NuGet
+*.log
+
+# Файлы конфигурации ReSharper
+_ReSharper*/
+
+# Файлы JetBrains Rider
+.idea/
+
+# Папка с локальными пользовательскими настройками
+*.sln.docstates
+
+appsettings.json
