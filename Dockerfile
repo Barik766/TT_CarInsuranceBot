@@ -1,4 +1,4 @@
-# Dockerfile с использованием solution файла
+# Простой Dockerfile без оптимизации кэша
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
@@ -10,26 +10,17 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем solution файл и все csproj файлы для кэширования
-COPY *.sln ./
-COPY CarInsuranceBot/*.csproj ./CarInsuranceBot/
-COPY CarInsuranceBot.Core/*.csproj ./CarInsuranceBot.Core/
-COPY CarInsuranceBot.Infrastructure/*.csproj ./CarInsuranceBot.Infrastructure/
-COPY CarInsuranceBot.Application/*.csproj ./CarInsuranceBot.Application/
-
-# Восстанавливаем зависимости через solution
-RUN dotnet restore "CarInsuranceBot.sln"
-
-# Копируем весь исходный код
+# Копируем все файлы проекта
 COPY . .
 
-# Собираем solution
-RUN dotnet build "CarInsuranceBot.sln" -c $BUILD_CONFIGURATION --no-restore
+# Восстанавливаем и собираем основной проект
+RUN dotnet restore "./CarInsuranceBot/CarInsuranceBot.csproj"
+RUN dotnet build "./CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION --no-restore
 
 FROM build AS publisher
 ARG BUILD_CONFIGURATION=Release
 # Публикуем основной проект
-RUN dotnet publish "CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
+RUN dotnet publish "./CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
 
 FROM base AS final
 WORKDIR /app
