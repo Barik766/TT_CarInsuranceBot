@@ -17,6 +17,8 @@ COPY . .
 RUN dotnet restore
 RUN dotnet build -c $BUILD_CONFIGURATION
 
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
 # Публикуем основной проект (CarInsuranceBot)
 WORKDIR "/src/CarInsuranceBot"
 RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
