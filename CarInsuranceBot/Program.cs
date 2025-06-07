@@ -71,6 +71,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapGet("/", () => Results.Ok("CarInsuranceBot is running."));
 
 // Инициализация базы данных
 using (var scope = app.Services.CreateScope())
