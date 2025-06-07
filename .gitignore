@@ -74,4 +74,17 @@ _ReSharper*/
 # Папка с локальными пользовательскими настройками
 *.sln.docstates
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+
 appsettings.json
