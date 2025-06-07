@@ -1,4 +1,4 @@
-# Простой Dockerfile без оптимизации кэша
+# Рабочий Dockerfile для CarInsuranceBot
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
@@ -10,21 +10,23 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем все файлы проекта
+# Копируем все файлы
 COPY . .
 
-# Восстанавливаем и собираем основной проект
-RUN dotnet restore "./CarInsuranceBot/CarInsuranceBot.csproj"
-RUN dotnet build "./CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION --no-restore
+# Восстанавливаем основной проект (API)
+RUN dotnet restore "./CarInsuranceBot/CarInsuranceBot.Api.csproj"
+
+# Собираем проект
+RUN dotnet build "./CarInsuranceBot/CarInsuranceBot.Api.csproj" -c $BUILD_CONFIGURATION --no-restore
 
 FROM build AS publisher
 ARG BUILD_CONFIGURATION=Release
-# Публикуем основной проект
-RUN dotnet publish "./CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
+# Публикуем проект
+RUN dotnet publish "./CarInsuranceBot/CarInsuranceBot.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false --no-restore
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publisher /app/publish .
 
-# Запускаем основное приложение
-ENTRYPOINT ["dotnet", "CarInsuranceBot.dll"]
+# Запускаем приложение
+ENTRYPOINT ["dotnet", "CarInsuranceBot.Api.dll"]
