@@ -1,4 +1,4 @@
-# Dockerfile для использования с solution файлом
+# Dockerfile с использованием solution файла
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
@@ -10,21 +10,21 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
-# Копируем solution файл и все csproj файлы
+# Копируем solution файл и все csproj файлы для кэширования
 COPY *.sln ./
 COPY CarInsuranceBot/*.csproj ./CarInsuranceBot/
 COPY CarInsuranceBot.Core/*.csproj ./CarInsuranceBot.Core/
 COPY CarInsuranceBot.Infrastructure/*.csproj ./CarInsuranceBot.Infrastructure/
 COPY CarInsuranceBot.Application/*.csproj ./CarInsuranceBot.Application/
 
-# Восстанавливаем зависимости
-RUN dotnet restore
+# Восстанавливаем зависимости через solution
+RUN dotnet restore "CarInsuranceBot.sln"
 
-# Копируем остальные файлы
+# Копируем весь исходный код
 COPY . .
 
-# Собираем решение
-RUN dotnet build -c $BUILD_CONFIGURATION --no-restore
+# Собираем solution
+RUN dotnet build "CarInsuranceBot.sln" -c $BUILD_CONFIGURATION --no-restore
 
 FROM build AS publisher
 ARG BUILD_CONFIGURATION=Release
@@ -34,4 +34,6 @@ RUN dotnet publish "CarInsuranceBot/CarInsuranceBot.csproj" -c $BUILD_CONFIGURAT
 FROM base AS final
 WORKDIR /app
 COPY --from=publisher /app/publish .
+
+# Запускаем основное приложение
 ENTRYPOINT ["dotnet", "CarInsuranceBot.dll"]
