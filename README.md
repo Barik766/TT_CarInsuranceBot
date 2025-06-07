@@ -100,3 +100,6 @@ On Render, set the following environment variables under "Environment → Secret
     "ApiKey": "YOUR_OPENAI_API_KEY"
   }
 }
+
+🔗 Live Bot
+👉 [Try the bot on Telegram](https://t.me/CarInsuranceTest_Bot)
