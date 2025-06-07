@@ -17,7 +17,7 @@ COPY . .
 RUN dotnet restore
 RUN dotnet build -c $BUILD_CONFIGURATION
 
-FROM build AS publish
+FROM build AS publisher
 ARG BUILD_CONFIGURATION=Release
 # Публикуем основной проект (CarInsuranceBot)
 WORKDIR "/src/CarInsuranceBot"
@@ -25,7 +25,7 @@ RUN dotnet publish -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=publisher /app/publish .
 
 # Автоматический поиск и запуск DLL
 CMD ["sh", "-c", "dotnet $(find . -name '*.dll' -not -path './ref/*' | head -1)"]
