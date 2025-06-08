@@ -25,18 +25,17 @@ namespace CarInsuranceBot.Application.StateMachine.States
         {
             try
             {
-                // Убрали проверку на повторный запуск /start
 
                 var welcomeMessage = await _openAIService.GenerateResponseAsync(
                     "Generate a friendly welcome message for a car insurance bot. Keep it professional but warm.",
                     cancellationToken: cancellationToken);
 
                 var fullMessage = $"{welcomeMessage}\n\n" +
-                                  "🚗 Добро пожаловать в наш сервис автострахования!\n\n" +
-                                  "Для оформления полиса мне потребуются:\n" +
-                                  "📋 Фото вашего паспорта\n" +
-                                  "🚙 Фото техпаспорта автомобиля\n\n" +
-                                  "Пожалуйста, отправьте фото вашего паспорта.";
+                                  "🚗 Welcome to our car insurance service!\n\n" +
+                                  "To get a policy, I'll need:\n" +
+                                  "📋 Photo of your passport\n" +
+                                  "🚙 Photo of the vehicle registration document\n\n" +
+                                  "Please send a photo of your passport.";
 
                 await _telegramService.SendTextMessageAsync(session.ChatId, fullMessage, cancellationToken);
 

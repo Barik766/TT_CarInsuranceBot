@@ -27,9 +27,9 @@ namespace CarInsuranceBot.Application.StateMachine.States
             {
                 var message = update.Message?.Text?.ToLowerInvariant();
 
-                if (message != "подтверждаю")
+                if (message != "confirm")
                 {
-                    await _telegramService.SendTextMessageAsync(session.ChatId, "Для продолжения напишите 'Подтверждаю'.", cancellationToken);
+                    await _telegramService.SendTextMessageAsync(session.ChatId, "To continue, type 'confirm'.", cancellationToken);
                     return ConversationState.PriceConfirmation;
                 }
 
@@ -37,7 +37,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
                 session.PolicyNumber = $"POL-{Guid.NewGuid().ToString()[..8].ToUpper()}";
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"Поздравляем! Ваш полис оформлен. Номер полиса: {session.PolicyNumber}",
+                    $"Congratulations! Your policy has been issued. Policy number: {session.PolicyNumber}",
                     cancellationToken);
                 return ConversationState.Completed;
             }

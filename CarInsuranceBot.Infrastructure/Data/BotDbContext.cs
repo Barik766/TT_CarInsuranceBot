@@ -20,13 +20,11 @@ namespace CarInsuranceBot.Infrastructure.Data
             {
                 entity.HasKey(e => e.ChatId);
 
-                // Игнорируем AdditionalData, т.к. EF не может мапить Dictionary<string, object>
                 entity.Ignore(e => e.AdditionalData);
 
                 entity.Property(e => e.PassportData).HasMaxLength(1000);
                 entity.Property(e => e.PolicyNumber).HasMaxLength(100);
 
-                // entity.HasIndex(e => e.CurrentState); // Включить при необходимости
             });
         }
     }

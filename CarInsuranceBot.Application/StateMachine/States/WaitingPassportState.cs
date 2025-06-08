@@ -42,11 +42,11 @@ namespace CarInsuranceBot.Application.StateMachine.States
                 session.PassportData = extracted.RawData;
                 session.ExtractedPassportData = extracted;
 
-                var message = $"📄 *Паспорт*\n" +
-                              $"- Имя: {extracted.Fields.GetValueOrDefault("FirstName")} {extracted.Fields.GetValueOrDefault("LastName")}\n" +
-                              $"- Паспорт: {extracted.Fields.GetValueOrDefault("PassportNumber")}\n" +
-                              $"- Дата рождения: {extracted.Fields.GetValueOrDefault("BirthDate")}\n\n" +
-                              $"Теперь отправьте фото техпаспорта автомобиля.";
+                var message = $"📄 *Passport*\n" +
+                              $"- Name: {extracted.Fields.GetValueOrDefault("FirstName")} {extracted.Fields.GetValueOrDefault("LastName")}\n" +
+                              $"- Passport: {extracted.Fields.GetValueOrDefault("PassportNumber")}\n" +
+                              $"- Date of birth: {extracted.Fields.GetValueOrDefault("BirthDate")}\n\n" +
+                              $"Now send a photo of the vehicle registration document (car type/manufacturer information side).";
 
                 await _telegramService.SendTextMessageAsync(session.ChatId, message, cancellationToken);
 
@@ -55,7 +55,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in WaitingPassportState for chat {ChatId}", session.ChatId);
-                await _telegramService.SendTextMessageAsync(session.ChatId, "Произошла ошибка при обработке паспорта. Попробуйте ещё раз.", cancellationToken);
+                await _telegramService.SendTextMessageAsync(session.ChatId, "An error occurred while processing your passport. Please try again.", cancellationToken);
                 return ConversationState.WaitingPassport;
             }
         }

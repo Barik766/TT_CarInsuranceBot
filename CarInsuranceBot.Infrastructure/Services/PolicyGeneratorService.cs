@@ -21,7 +21,7 @@ namespace CarInsuranceBot.Infrastructure.Services
             if (string.IsNullOrWhiteSpace(passportData) || string.IsNullOrWhiteSpace(carData))
             {
                 _logger.LogWarning("Missing passport or car data for policy generation.");
-                return "Недостаточно данных для генерации полиса.";
+                return "Insufficient data to generate a policy.";
             }
 
             try
@@ -32,7 +32,7 @@ namespace CarInsuranceBot.Infrastructure.Services
             catch (System.Exception ex)
             {
                 _logger.LogError(ex, "Error generating policy content.");
-                return "Произошла ошибка при генерации полиса.";
+                return "An error occurred while generating the policy.";
             }
         }
     }

@@ -31,19 +31,19 @@ namespace CarInsuranceBot.Application.StateMachine.States
             {
                 var message = update.Message?.Text?.Trim().ToLowerInvariant();
 
-                if (message == "нет")
+                if (message == "no")
                 {
                     await _telegramService.SendTextMessageAsync(session.ChatId,
-                        "Хорошо, давайте начнём заново. Пожалуйста, загрузите фотографии документов.",
+                        "Okay, let's start over. Please upload photos of your documents.",
                         cancellationToken);
 
                     return ConversationState.WaitingPassport;
                 }
 
-                if (message != "да")
+                if (message != "yes")
                 {
                     await _telegramService.SendTextMessageAsync(session.ChatId,
-                        "Пожалуйста, подтвердите данные, написав 'Да'. Если хотите начать заново — напишите 'Нет'.",
+                        "Please confirm the information by typing 'Yes'. If you want to start over, type 'No'.",
                         cancellationToken);
 
                     return ConversationState.WaitingConfirmation;
@@ -54,7 +54,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
                 var price = _configuration.GetValue<decimal>("InsuranceSettings:Price");
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"Отлично! Стоимость страховки: {price}$.\n Вы согласны? Подтвердите покупку, написав 'Подтверждаю'.",
+                    $"Great! Insurance cost: {price}$.\n Do you agree? Confirm your purchase by typing 'Confirm'.",
                     cancellationToken);
 
                 return ConversationState.PriceConfirmation;

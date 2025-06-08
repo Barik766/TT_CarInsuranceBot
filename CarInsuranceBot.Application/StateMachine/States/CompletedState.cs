@@ -24,7 +24,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
         public Task<ConversationState> HandleAsync(UserSession session, Update update, CancellationToken cancellationToken = default)
         {
             _telegramService.SendTextMessageAsync(session.ChatId,
-                "✅ Ваш страховой полис уже оформлен. Если у вас есть вопросы, напишите нам!",
+                "✅ Your insurance policy has already been issued. If you have any questions, please contact us!",
                 cancellationToken);
 
             return Task.FromResult(ConversationState.Completed);

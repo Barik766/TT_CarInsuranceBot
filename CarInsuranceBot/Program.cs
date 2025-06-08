@@ -13,12 +13,12 @@ using CarInsuranceBot.Application.StateMachine.Transitions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем сервисы
+// Add services
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Настройка логирования
+// Logging settings
 builder.Host.UseSerilog((context, configuration) =>
 {
     configuration
@@ -33,7 +33,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddHttpClient();
 builder.Services.AddHttpClient<IOpenAIService, OpenAIService>();
 
-// Core сервисы
+// Core services
 builder.Services.AddScoped<ITelegramService, TelegramService>();
 builder.Services.AddScoped<IMindeeService, MindeeService>();
 builder.Services.AddScoped<IOpenAIService, OpenAIService>(); 
@@ -48,10 +48,9 @@ builder.Services.AddScoped<WaitingCarDocState>();
 builder.Services.AddScoped<ConfirmationState>();
 builder.Services.AddScoped<PriceConfirmationState>();
 builder.Services.AddScoped<CompletedState>();
-builder.Services.AddScoped<ResetState>();
 builder.Services.AddScoped<IGlobalCommandHandler, ResetCommandHandler>();
 
-// База данных
+// Database
 builder.Services.AddDbContext<BotDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
@@ -73,7 +72,7 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapGet("/", () => Results.Ok("CarInsuranceBot is running."));
 
-// Инициализация базы данных
+// Database initialization
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<BotDbContext>();

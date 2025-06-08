@@ -42,7 +42,7 @@ namespace CarInsuranceBot.Api.Controllers
                 var session = await _stateManager.GetSessionAsync(chatId, cancellationToken);
                 var messageText = update.Message?.Text?.Trim();
 
-                // Просто всегда обрабатываем команду /start без ограничений
+                
                 if (messageText == "/start")
                 {
                     var nextState = await _stateMachine.ProcessUpdateAsync(session, update, cancellationToken);
@@ -54,7 +54,7 @@ namespace CarInsuranceBot.Api.Controllers
                     return Ok();
                 }
 
-                // Обычная обработка для всех остальных сообщений
+                
                 var nextRegularState = await _stateMachine.ProcessUpdateAsync(session, update, cancellationToken);
                 if (nextRegularState != session.CurrentState)
                 {

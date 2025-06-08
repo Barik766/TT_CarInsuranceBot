@@ -25,12 +25,10 @@ namespace CarInsuranceBot.Application.StateMachine.Transitions
             {
                 await _stateManager.ClearSessionAsync(session.ChatId, cancellationToken);
 
-                // ОБНОВЛЯЕМ сессию в памяти:
                 session.CurrentState = ConversationState.Start;
-                // Сбрось здесь все дополнительные поля сессии, которые мешают повторному старту, если есть
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    "✅ Ваше состояние успешно сброшено. Начинаем заново.",
+                    "✅ Your status has been successfully reset. Let's start over. Please send your passport data",
                     cancellationToken);
 
                 _logger.LogInformation("User session reset for chat {ChatId}", session.ChatId);

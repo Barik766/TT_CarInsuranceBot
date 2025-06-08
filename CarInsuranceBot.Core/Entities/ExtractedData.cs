@@ -9,7 +9,6 @@ namespace CarInsuranceBot.Core.Entities
         public int Id { get; set; }
         public string DocumentType { get; set; } = string.Empty;
 
-        // Хранить сериализованный словарь в базе в этом поле
         public string FieldsJson { get; set; } = "{}";
 
         [NotMapped]

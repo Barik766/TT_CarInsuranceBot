@@ -21,7 +21,6 @@ namespace CarInsuranceBot.Infrastructure.Services
             _configuration = configuration;
             _logger = logger;
 
-            // Инициализируем официальный клиент Mindee
             var apiKey = _configuration["Mindee:ApiKey"];
             _mindeeClient = new MindeeClient(apiKey);
 
@@ -47,7 +46,6 @@ namespace CarInsuranceBot.Infrastructure.Services
                         version: "1"
                     );
 
-                    // !!! СИНХРОННЫЙ ЗАПРОС, т.к. паспорт не поддерживает async
                     var response = await _mindeeClient.ParseAsync<GeneratedV1>(inputSource, endpoint);
                     return ParsePassportResponse(response.Document.ToString(), "Passport");
                 }
@@ -147,7 +145,6 @@ namespace CarInsuranceBot.Infrastructure.Services
             }
         }
 
-        // Читает настройки эндпоинта из конфигурации
         private CustomEndpoint GetCustomEndpoint(string sectionName)
         {
             var section = _configuration.GetSection($"Mindee:Endpoints:{sectionName}");
@@ -272,13 +269,13 @@ namespace CarInsuranceBot.Infrastructure.Services
                     switch (field.Key.ToLower())
                     {
                         case "registration_number":
-                            userFriendlyFields["Регистрационный номер"] = field.Value;
+                            userFriendlyFields["Registration number"] = field.Value;
                             break;
                         case "surname":
-                            userFriendlyFields["Фамилия"] = field.Value;
+                            userFriendlyFields["Last name"] = field.Value;
                             break;
                         case "name":
-                            userFriendlyFields["Имя"] = field.Value;
+                            userFriendlyFields["Name"] = field.Value;
                             break;
                         default:
                             userFriendlyFields[field.Key] = field.Value;
@@ -364,12 +361,11 @@ namespace CarInsuranceBot.Infrastructure.Services
             {
                 if (property.Value.ValueKind == JsonValueKind.Object)
                 {
-                    // Ищем поле "value" в объекте
                     if (property.Value.TryGetProperty("value", out var valueElement))
                     {
                         var value = valueElement.ValueKind == JsonValueKind.String
                             ? valueElement.GetString()
-                            : valueElement.GetRawText().Trim('"'); // Убираем кавычки если это не строка
+                            : valueElement.GetRawText().Trim('"');
 
                         if (!string.IsNullOrEmpty(value) && value != "null")
                         {
@@ -444,19 +440,19 @@ namespace CarInsuranceBot.Infrastructure.Services
             {
                 if (line.StartsWith(":") && line.EndsWith(":") && !line.Contains(" "))
                 {
-                    // :manufacturer: — это ключ
+
                     currentField = line.Trim(':');
                 }
                 else if (line.StartsWith(":value:") && currentField != null)
                 {
-                    var value = line.Substring(7).Trim(); // убираем ':value:'
+                    var value = line.Substring(7).Trim(); 
                     if (!string.IsNullOrWhiteSpace(value) && value != "null" && value != "N/A")
                     {
                         fields[currentField] = value;
                         _logger.LogDebug("Parsed field from text: {Key} = {Value}", currentField, value);
                     }
 
-                    currentField = null; // сбрасываем ключ, чтобы не использовать его повторно
+                    currentField = null; 
                 }
             }
         }

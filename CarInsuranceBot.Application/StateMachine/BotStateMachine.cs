@@ -24,7 +24,6 @@ namespace CarInsuranceBot.Application.StateMachine
             _logger = logger;
             _states = InitializeStates();
 
-            // Получаем все зарегистрированные глобальные хендлеры команд из DI
             _globalCommandHandlers = _serviceProvider.GetServices<IGlobalCommandHandler>();
         }
 
@@ -45,7 +44,6 @@ namespace CarInsuranceBot.Application.StateMachine
         {
             try
             {
-                // 1. Сначала пробуем обработать глобальные команды
                 foreach (var handler in _globalCommandHandlers)
                 {
                     var (handled, newState) = await handler.HandleCommandAsync(session, update, cancellationToken);
@@ -57,7 +55,6 @@ namespace CarInsuranceBot.Application.StateMachine
                     }
                 }
 
-                // 2. Если глобальная команда не сработала, обрабатываем текущее состояние
                 if (!_states.TryGetValue(session.CurrentState, out var state))
                 {
                     _logger.LogWarning("Unknown state {State} for chat {ChatId}", session.CurrentState, session.ChatId);

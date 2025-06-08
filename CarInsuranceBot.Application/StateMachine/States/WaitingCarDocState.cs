@@ -33,7 +33,7 @@ public class WaitingCarDocState : IState
             if (update.Message?.Photo == null)
             {
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    "Пожалуйста, отправьте фото техпаспорта (сначала переднюю сторону с информацией о машине, затем заднюю с информацией о владельце).",
+                    "Please send a photo of the vehicle registration document (first the front side with information about the vehicle, then the back side with information about the owner).",
                     cancellationToken);
                 return ConversationState.WaitingCarDoc;
             }
@@ -53,7 +53,7 @@ public class WaitingCarDocState : IState
                 var frontText = FormatCarInfo(extractedFront?.Fields);
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"✅ Передняя сторона техпаспорта обработана:\n\n🚗 *Информация о транспортном средстве:*\n{frontText}\n\n📋 Теперь отправьте заднюю сторону с информацией о владельце.",
+                    $"✅ The front side of the technical passport has been processed.:\n\n🚗 *Vehicle information:*\n{frontText}\n\n📋 Now send the back side with the owner's information..",
                     cancellationToken);
 
                 return ConversationState.WaitingCarDoc;
@@ -81,9 +81,9 @@ public class WaitingCarDocState : IState
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Ошибка в обработке техпаспорта для чата {ChatId}", session.ChatId);
+            _logger.LogError(ex, "Error in processing the technical passport for chat {ChatId}", session.ChatId);
             await _telegramService.SendTextMessageAsync(session.ChatId,
-                "❌ Произошла ошибка при обработке документа. Попробуйте отправить фото ещё раз.",
+                "❌ An error occurred while processing the document. Please try sending the photo again.",
                 cancellationToken);
             return ConversationState.WaitingCarDoc;
         }
@@ -92,7 +92,7 @@ public class WaitingCarDocState : IState
     private string FormatCarInfo(Dictionary<string, string>? fields)
     {
         if (fields == null || fields.Count == 0)
-            return "❌ Данные о транспортном средстве не распознаны.";
+            return "❌ Vehicle data not recognized.";
 
         return string.Join("\n", fields.Select(f => $"• {f.Key}: {f.Value}"));
     }
@@ -100,7 +100,7 @@ public class WaitingCarDocState : IState
     private string FormatOwnerInfo(Dictionary<string, string>? fields)
     {
         if (fields == null || fields.Count == 0)
-            return "❌ Данные о владельце не распознаны.";
+            return "❌ Owner information not recognized.";
 
         return string.Join("\n", fields.Select(f => $"• {f.Key}: {f.Value}"));
     }
@@ -108,7 +108,7 @@ public class WaitingCarDocState : IState
     private string FormatPassportInfo(Dictionary<string, string>? fields)
     {
         if (fields == null || fields.Count == 0)
-            return "❌ Данные паспорта не найдены.";
+            return "❌ Passport details not found.";
 
         return string.Join("\n", fields.Select(f => $"• {f.Key}: {f.Value}"));
     }
@@ -117,22 +117,19 @@ public class WaitingCarDocState : IState
                                   Dictionary<string, string>? carFields,
                                   Dictionary<string, string>? ownerFields)
     {
-        var summary = "📋 *Сводная информация по документам:*\n\n";
+        var summary = "📋 *Summary information on documents:*\n\n";
 
-        // Информация из паспорта
-        summary += "👤 *Паспортные данные:*\n";
+        summary += "👤 *Passport details:*\n";
         summary += FormatPassportInfo(passportFields) + "\n\n";
 
-        // Информация о транспортном средстве
-        summary += "🚗 *Транспортное средство:*\n";
+        summary += "🚗 *Vehicle:*\n";
         summary += FormatCarInfo(carFields) + "\n\n";
 
-        // Информация о владельце ТС
-        summary += "📝 *Регистрационные данные:*\n";
+        summary += "📝 *Registration details:*\n";
         summary += FormatOwnerInfo(ownerFields) + "\n\n";
 
-        summary += "✅ *Все документы обработаны. Подтверждаете введенную информацию?*\n\n";
-        summary += "Пожалуйста, подтвердите данные, написав 'Да'.";
+        summary += "✅ *All documents have been processed. Do you confirm the information you entered?*\n\n";
+        summary += "Please confirm the details by writing 'Yes'.";
 
         return summary;
     }
