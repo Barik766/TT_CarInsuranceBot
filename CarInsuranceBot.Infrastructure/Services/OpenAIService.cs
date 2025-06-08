@@ -74,10 +74,11 @@ namespace CarInsuranceBot.Infrastructure.Services
         public async Task<string> GeneratePolicyContentAsync(string passportData, string carData, CancellationToken cancellationToken = default)
         {
             var prompt = new StringBuilder();
-            prompt.AppendLine("Please generate a car insurance policy text based on the following data:");
+            prompt.AppendLine("Please generate a mock car insurance policy text based on the following data:");
             prompt.AppendLine($"Passport data: {passportData}");
             prompt.AppendLine($"Car data: {carData}");
             prompt.AppendLine("Make the text formal and professional. Include policy terms, coverage details, and important information.");
+            prompt.AppendLine("Dont ask for any additional data/information! Use only information you have.");
 
             return await GenerateResponseAsync(prompt.ToString(), cancellationToken: cancellationToken);
         }

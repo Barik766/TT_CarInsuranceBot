@@ -221,10 +221,10 @@ namespace CarInsuranceBot.Infrastructure.Services
                     switch (field.Key.ToLower())
                     {
                         case "manufacturer":
-                            userFriendlyFields["Производитель"] = field.Value;
+                            userFriendlyFields["Manufacturer"] = field.Value;
                             break;
                         case "model":
-                            userFriendlyFields["Модель"] = field.Value;
+                            userFriendlyFields["Model"] = field.Value;
                             break;
                         default:
                             userFriendlyFields[field.Key] = field.Value;
