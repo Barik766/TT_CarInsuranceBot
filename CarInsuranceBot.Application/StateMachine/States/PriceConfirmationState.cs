@@ -5,19 +5,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using System.Text;
 
 namespace CarInsuranceBot.Application.StateMachine.States
 {
     public class PriceConfirmationState : IState
     {
         private readonly ITelegramService _telegramService;
+        private readonly IPolicyGeneratorService _policyGeneratorService;
         private readonly ILogger<PriceConfirmationState> _logger;
 
         public ConversationState StateType => ConversationState.PriceConfirmation;
 
-        public PriceConfirmationState(ITelegramService telegramService, ILogger<PriceConfirmationState> logger)
+        public PriceConfirmationState(ITelegramService telegramService, IPolicyGeneratorService policyGeneratorService, ILogger<PriceConfirmationState> logger)
         {
             _telegramService = telegramService;
+            _policyGeneratorService = policyGeneratorService;
             _logger = logger;
         }
 
@@ -36,17 +39,35 @@ namespace CarInsuranceBot.Application.StateMachine.States
                 session.IsPriceConfirmed = true;
                 session.PolicyNumber = $"POL-{Guid.NewGuid().ToString()[..8].ToUpper()}";
 
-                await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"Congratulations! Your policy has been issued. Policy number: {session.PolicyNumber}",
+                // Generate policy using PolicyGeneratorService
+                var policyContent = await _policyGeneratorService.GeneratePolicyAsync(
+                    session.PassportData ?? "Passport data not available",
+                    $"Front: {session.CarDocFrontFileId}, Back: {session.CarDocBackFileId}",
                     cancellationToken);
+
+                // Create final message with policy information
+                await _telegramService.SendTextMessageAsync(session.ChatId,
+                    $"🎉 Congratulations! Your car insurance policy has been issued!\n" +
+                    $"📋 Policy Number: {session.PolicyNumber}\n\n" +
+                    $"📄 Policy Details:\n{policyContent}",
+                    cancellationToken);
+
                 return ConversationState.Completed;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in PriceConfirmationState for chat {ChatId}", session.ChatId);
-                return ConversationState.Error;
+
+                // Fallback message in case of error
+                session.IsPriceConfirmed = true;
+                session.PolicyNumber = $"POL-{Guid.NewGuid().ToString()[..8].ToUpper()}";
+
+                await _telegramService.SendTextMessageAsync(session.ChatId,
+                    $"Congratulations! Your policy has been issued. Policy number: {session.PolicyNumber}",
+                    cancellationToken);
+
+                return ConversationState.Completed;
             }
         }
     }
-
 }

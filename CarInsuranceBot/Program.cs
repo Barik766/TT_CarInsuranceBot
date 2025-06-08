@@ -31,7 +31,6 @@ builder.Services.AddMemoryCache();
 
 // HttpClient
 builder.Services.AddHttpClient();
-builder.Services.AddHttpClient<IOpenAIService, OpenAIService>();
 
 // Core services
 builder.Services.AddScoped<ITelegramService, TelegramService>();

@@ -21,7 +21,6 @@ namespace CarInsuranceBot.Infrastructure.Services
             _logger = logger;
             _apiKey = configuration["OpenAI:ApiKey"] ?? throw new ArgumentNullException("OpenAI:ApiKey");
             _openAiEndpoint = configuration["OpenAI:Endpoint"] ?? "https://api.openai.com/v1/chat/completions";
-            _logger.LogInformation("✅ OpenAI API key loaded: {Prefix}...", _apiKey.Substring(0, 5)); 
         }
 
         public async Task<string> GenerateResponseAsync(string prompt, string context = "", CancellationToken cancellationToken = default)
@@ -52,7 +51,7 @@ namespace CarInsuranceBot.Infrastructure.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 {
                     _logger.LogWarning("⚠️ OpenAI API rate limit exceeded (429).");
-                    return "Слишком много запросов. Подождите немного и попробуйте снова.";
+                    return "Too many requests. Please wait a moment and try again.";
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -67,18 +66,18 @@ namespace CarInsuranceBot.Infrastructure.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Ошибка при генерации ответа OpenAI.");
-                return "Извините, возникла ошибка при обработке запроса.";
+                _logger.LogError(ex, "❌ Error generating OpenAI response.");
+                return "Sorry, an error occurred while processing the request.";
             }
         }
 
         public async Task<string> GeneratePolicyContentAsync(string passportData, string carData, CancellationToken cancellationToken = default)
         {
             var prompt = new StringBuilder();
-            prompt.AppendLine("Пожалуйста, сгенерируй текст полиса автострахования на основе следующих данных:");
-            prompt.AppendLine($"Паспортные данные: {passportData}");
-            prompt.AppendLine($"Данные автомобиля: {carData}");
-            prompt.AppendLine("Сделай текст формальным и профессиональным.");
+            prompt.AppendLine("Please generate a car insurance policy text based on the following data:");
+            prompt.AppendLine($"Passport data: {passportData}");
+            prompt.AppendLine($"Car data: {carData}");
+            prompt.AppendLine("Make the text formal and professional. Include policy terms, coverage details, and important information.");
 
             return await GenerateResponseAsync(prompt.ToString(), cancellationToken: cancellationToken);
         }
