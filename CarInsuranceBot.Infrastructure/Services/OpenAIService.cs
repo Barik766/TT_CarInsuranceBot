@@ -20,7 +20,7 @@ namespace CarInsuranceBot.Infrastructure.Services
             _httpClient = httpClient;
             _logger = logger;
             _apiKey = configuration["OpenAI:ApiKey"] ?? throw new ArgumentNullException("OpenAI:ApiKey");
-            _openAiEndpoint = configuration["OpenAI:Endpoint"] ?? "https://api.openai.com/v1/chat/completions";
+            _openAiEndpoint = configuration["OpenAI:Endpoint"] ?? "https://openrouter.ai/api/v1/chat/completions";
         }
 
         public async Task<string> GenerateResponseAsync(string prompt, string context = "", CancellationToken cancellationToken = default)
@@ -36,7 +36,7 @@ namespace CarInsuranceBot.Infrastructure.Services
 
                 var requestBody = new
                 {
-                    model = "gpt-3.5-turbo",
+                    model = "gpt-4o-mini",
                     messages,
                     max_tokens = 300,
                     temperature = 0.7
