@@ -30,10 +30,19 @@ public class WaitingCarDocState : IState
     {
         try
         {
+            // Проверяем команду "done" для завершения обработки
+            if (update.Message?.Text?.ToLower() == "done")
+            {
+                return await ProcessDoneCommand(session, cancellationToken);
+            }
+
             if (update.Message?.Photo == null)
             {
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    "Please send a photo of the vehicle registration document (first the front side with information about the vehicle, then the back side with information about the owner).",
+                    "📋 Please send a photo of your vehicle registration document:\n\n" +
+                    "• If your document has two sides - first send the front side (vehicle information), then the back side (owner information)\n" +
+                    "• If your document is single-sided - send one photo\n\n" +
+                    "After uploading all photos, type 'done' to continue.",
                     cancellationToken);
                 return ConversationState.WaitingCarDoc;
             }
@@ -43,41 +52,29 @@ public class WaitingCarDocState : IState
 
             if (session.CarDocFrontFileId == null)
             {
-                // Обрабатываем переднюю сторону (информация о машине)
-                session.CarDocFrontFileId = fileId;
-                var extractedFront = await _mindeeService.ExtractCarDocFrontAsync(imageData, cancellationToken);
-                session.ExtractedCarDocFront = extractedFront;
-
-                await _stateManagerService.UpdateSessionAsync(session, cancellationToken);
-
-                var frontText = FormatCarInfo(extractedFront?.Fields);
+                // Обрабатываем первую сторону методом ExtractCarDocFrontAsync
+                await ProcessFirstSide(session, fileId, imageData, cancellationToken);
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"✅ The front side of the technical passport has been processed.:\n\n🚗 *Vehicle information:*\n{frontText}\n\n📋 Now send the back side with the owner's information..",
+                    "✅ Front side of the technical passport has been processed.\n\n" +
+                    "If your document has a back side with owner information - please upload it.\n" +
+                    "If your document is single-sided - type 'done' to continue.",
                     cancellationToken);
 
                 return ConversationState.WaitingCarDoc;
             }
+            else
+            {
+                // Обрабатываем вторую сторону методом ExtractCarDocBackAsync
+                await ProcessSecondSide(session, fileId, imageData, cancellationToken);
 
-            // Обрабатываем заднюю сторону (информация о владельце)
-            session.CarDocBackFileId = fileId;
-            var extractedBack = await _mindeeService.ExtractCarDocBackAsync(imageData, cancellationToken);
-            session.ExtractedCarDocBack = extractedBack;
+                await _telegramService.SendTextMessageAsync(session.ChatId,
+                    "✅ Back side of the technical passport has been processed.\n\n" +
+                    "Type 'done' to complete document processing.",
+                    cancellationToken);
 
-            await _stateManagerService.UpdateSessionAsync(session, cancellationToken);
-
-            var passportFields = session.ExtractedPassportData?.Fields;
-            var frontFields = session.ExtractedCarDocFront?.Fields;
-            var backFields = session.ExtractedCarDocBack?.Fields;
-
-            _logger.LogInformation("CarDoc Front fields: {Fields}", JsonSerializer.Serialize(frontFields));
-            _logger.LogInformation("CarDoc Back fields: {Fields}", JsonSerializer.Serialize(backFields));
-
-            var summary = BuildFullSummary(passportFields, frontFields, backFields);
-
-            await _telegramService.SendTextMessageAsync(session.ChatId, summary, cancellationToken);
-
-            return ConversationState.WaitingConfirmation;
+                return ConversationState.WaitingCarDoc;
+            }
         }
         catch (Exception ex)
         {
@@ -87,6 +84,80 @@ public class WaitingCarDocState : IState
                 cancellationToken);
             return ConversationState.WaitingCarDoc;
         }
+    }
+
+    private async Task ProcessFirstSide(UserSession session, string fileId, byte[] imageData, CancellationToken cancellationToken)
+    {
+        session.CarDocFrontFileId = fileId;
+
+        // Используем ExtractCarDocFrontAsync для первой стороны/односторонного документа
+        var extractedFront = await _mindeeService.ExtractCarDocFrontAsync(imageData, cancellationToken);
+        session.ExtractedCarDocFront = extractedFront;
+
+        await _stateManagerService.UpdateSessionAsync(session, cancellationToken);
+
+        var frontText = FormatCarInfo(extractedFront?.Fields);
+        await _telegramService.SendTextMessageAsync(session.ChatId,
+            $"✅ Vehicle information extracted:\n\n🚗 *Vehicle details:*\n{frontText}",
+            cancellationToken);
+    }
+
+    private async Task ProcessSecondSide(UserSession session, string fileId, byte[] imageData, CancellationToken cancellationToken)
+    {
+        session.CarDocBackFileId = fileId;
+
+        // Используем ExtractCarDocBackAsync для второй стороны
+        var extractedBack = await _mindeeService.ExtractCarDocBackAsync(imageData, cancellationToken);
+        session.ExtractedCarDocBack = extractedBack;
+
+        await _stateManagerService.UpdateSessionAsync(session, cancellationToken);
+
+        var backText = FormatOwnerInfo(extractedBack?.Fields);
+        await _telegramService.SendTextMessageAsync(session.ChatId,
+            $"✅ Owner information extracted:\n\n👤 *Owner details:*\n{backText}",
+            cancellationToken);
+    }
+
+    private async Task<ConversationState> ProcessDoneCommand(UserSession session, CancellationToken cancellationToken)
+    {
+        // Если есть только передняя сторона, пытаемся извлечь информацию о владельце
+        if (session.CarDocFrontFileId != null && session.CarDocBackFileId == null)
+        {
+            try
+            {
+                // Получаем данные первого изображения
+                var frontImageData = await _telegramService.DownloadFileAsync(session.CarDocFrontFileId, cancellationToken);
+
+                // Используем ExtractCarDocBackAsync на том же изображении для извлечения информации о владельце
+                var extractedOwner = await _mindeeService.ExtractCarDocBackAsync(frontImageData, cancellationToken);
+                session.ExtractedCarDocBack = extractedOwner;
+
+                await _stateManagerService.UpdateSessionAsync(session, cancellationToken);
+
+                var ownerText = FormatOwnerInfo(extractedOwner?.Fields);
+                await _telegramService.SendTextMessageAsync(session.ChatId,
+                    $"✅ Owner information extracted from the same document:\n\n👤 *Owner details:*\n{ownerText}",
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Could not extract owner information from single-sided document for chat {ChatId}", session.ChatId);
+                // Продолжаем без информации о владельце
+            }
+        }
+
+        // Формируем итоговую сводку
+        var passportFields = session.ExtractedPassportData?.Fields;
+        var frontFields = session.ExtractedCarDocFront?.Fields;
+        var backFields = session.ExtractedCarDocBack?.Fields;
+
+        _logger.LogInformation("CarDoc Front fields: {Fields}", JsonSerializer.Serialize(frontFields));
+        _logger.LogInformation("CarDoc Back fields: {Fields}", JsonSerializer.Serialize(backFields));
+
+        var summary = BuildFullSummary(passportFields, frontFields, backFields);
+        await _telegramService.SendTextMessageAsync(session.ChatId, summary, cancellationToken);
+
+        return ConversationState.WaitingConfirmation;
     }
 
     private string FormatCarInfo(Dictionary<string, string>? fields)
@@ -117,19 +188,20 @@ public class WaitingCarDocState : IState
                                   Dictionary<string, string>? carFields,
                                   Dictionary<string, string>? ownerFields)
     {
-        var summary = "📋 *Summary information on documents:*\n\n";
+        var summary = "📋 *Document Summary:*\n\n";
 
-        summary += "👤 *Passport details:*\n";
+        summary += "👤 *Passport Details:*\n";
         summary += FormatPassportInfo(passportFields) + "\n\n";
 
-        summary += "🚗 *Vehicle:*\n";
+        summary += "🚗 *Vehicle Information:*\n";
         summary += FormatCarInfo(carFields) + "\n\n";
 
-        summary += "📝 *Registration details:*\n";
+        summary += "📝 *Registration Details:*\n";
         summary += FormatOwnerInfo(ownerFields) + "\n\n";
 
-        summary += "✅ *All documents have been processed. Do you confirm the information you entered?*\n\n";
-        summary += "Please confirm the details by writing 'Yes'.";
+        summary += "✅ *All documents have been processed. Do you confirm the entered information?*\n\n";
+        summary += "Please confirm the details by writing 'Yes'.\n";
+        summary += "Or write 'No' if you want to start over.";
 
         return summary;
     }

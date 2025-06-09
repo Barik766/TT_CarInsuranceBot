@@ -30,9 +30,9 @@ namespace CarInsuranceBot.Application.StateMachine.States
             {
                 var message = update.Message?.Text?.ToLowerInvariant();
 
-                if (message != "confirm")
+                if (message != "yes")
                 {
-                    await _telegramService.SendTextMessageAsync(session.ChatId, "To continue, type 'confirm'.", cancellationToken);
+                    await _telegramService.SendTextMessageAsync(session.ChatId, "To continue, type 'yes'.", cancellationToken);
                     return ConversationState.PriceConfirmation;
                 }
 

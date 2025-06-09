@@ -79,6 +79,7 @@ namespace CarInsuranceBot.Infrastructure.Services
             prompt.AppendLine($"Car data: {carData}");
             prompt.AppendLine("Make the text formal and professional. Include policy terms, coverage details, and important information.");
             prompt.AppendLine("Dont ask for any additional data/information! Use only information you have.");
+            prompt.AppendLine("The final document should not have any blank fields. The only field that should remain blank is the signature field. That's all.");
 
             return await GenerateResponseAsync(prompt.ToString(), cancellationToken: cancellationToken);
         }

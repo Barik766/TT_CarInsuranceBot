@@ -54,7 +54,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
                 var price = _configuration.GetValue<decimal>("InsuranceSettings:Price");
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
-                    $"Great! Insurance cost: {price}$.\n Do you agree? Confirm your purchase by typing 'Confirm'.",
+                    $"Great! Insurance cost: {price}$.\n Do you agree? Confirm your purchase by typing 'yes'.",
                     cancellationToken);
 
                 return ConversationState.PriceConfirmation;
