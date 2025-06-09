@@ -4,6 +4,8 @@ CarInsuranceBot is a Telegram bot that automates car insurance registration usin
 
 ---
 
+[![Bot work demonstration](https://img.youtube.com/vi/i3q1rj_I_7Y/0.jpg)](https://www.youtube.com/watch?v=i3q1rj_I_7Y)
+
 ## 🛠️ Tech Stack
 
 - [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
