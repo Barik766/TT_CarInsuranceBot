@@ -36,7 +36,7 @@ namespace CarInsuranceBot.Api.Middleware
             var response = new
             {
                 error = "Internal Server Error",
-                details = exception.Message // Можно убрать в продакшн или показывать более общий текст
+                details = exception.Message // You can remove it from production or display more general text.
             };
 
             var payload = JsonSerializer.Serialize(response);

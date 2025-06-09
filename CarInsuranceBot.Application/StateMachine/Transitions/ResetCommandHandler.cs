@@ -21,7 +21,7 @@ namespace CarInsuranceBot.Application.StateMachine.Transitions
 
         public async Task<(bool Handled, ConversationState NewState)> HandleCommandAsync(UserSession session, Update update, CancellationToken cancellationToken)
         {
-            if (update.Message?.Text?.Trim().ToLower() == "/reset" || session.CurrentState == ConversationState.WaitingConfirmation && update.Message?.Text?.Trim().ToLower() == "нет")
+            if (update.Message?.Text?.Trim().ToLower() == "/reset" || session.CurrentState == ConversationState.WaitingConfirmation && update.Message?.Text?.Trim().ToLower() == "no")
             {
                 await _stateManager.ClearSessionAsync(session.ChatId, cancellationToken);
 
