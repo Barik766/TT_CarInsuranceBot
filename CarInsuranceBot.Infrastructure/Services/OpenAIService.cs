@@ -28,10 +28,8 @@ namespace CarInsuranceBot.Infrastructure.Services
             try
             {
                 var messages = new List<object>();
-
                 if (!string.IsNullOrWhiteSpace(context))
                     messages.Add(new { role = "system", content = context });
-
                 messages.Add(new { role = "user", content = prompt });
 
                 var requestBody = new
@@ -58,7 +56,6 @@ namespace CarInsuranceBot.Infrastructure.Services
 
                 using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
                 using var jsonDoc = await JsonDocument.ParseAsync(responseStream, cancellationToken: cancellationToken);
-
                 var choice = jsonDoc.RootElement.GetProperty("choices")[0];
                 var message = choice.GetProperty("message").GetProperty("content").GetString();
 
@@ -69,19 +66,6 @@ namespace CarInsuranceBot.Infrastructure.Services
                 _logger.LogError(ex, "❌ Error generating OpenAI response.");
                 return "Sorry, an error occurred while processing the request.";
             }
-        }
-
-        public async Task<string> GeneratePolicyContentAsync(string passportData, string carData, CancellationToken cancellationToken = default)
-        {
-            var prompt = new StringBuilder();
-            prompt.AppendLine("Please generate a mock car insurance policy text based on the following data:");
-            prompt.AppendLine($"Passport data: {passportData}");
-            prompt.AppendLine($"Car data: {carData}");
-            prompt.AppendLine("Make the text formal and professional. Include policy terms, coverage details, and important information.");
-            prompt.AppendLine("Dont ask for any additional data/information! Use only information you have.");
-            prompt.AppendLine("The final document should not have any blank fields. The only field that should remain blank is the signature field. That's all.");
-
-            return await GenerateResponseAsync(prompt.ToString(), cancellationToken: cancellationToken);
         }
     }
 }
