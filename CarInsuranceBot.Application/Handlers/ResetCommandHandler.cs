@@ -4,7 +4,7 @@ using CarInsuranceBot.Core.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using Telegram.Bot.Types;
 
-namespace CarInsuranceBot.Application.StateMachine.Transitions
+namespace CarInsuranceBot.Application.Handlers
 {
     public class ResetCommandHandler : IGlobalCommandHandler
     {

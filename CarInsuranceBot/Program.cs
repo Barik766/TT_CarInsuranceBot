@@ -9,7 +9,7 @@ using CarInsuranceBot.Infrastructure.Data;
 using Serilog;
 using CarInsuranceBot.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using CarInsuranceBot.Application.StateMachine.Transitions;
+using CarInsuranceBot.Application.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
