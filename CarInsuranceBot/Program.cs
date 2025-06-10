@@ -10,6 +10,7 @@ using Serilog;
 using CarInsuranceBot.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using CarInsuranceBot.Application.Handlers;
+using CarInsuranceBot.Application.StateMachine.Transitions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,6 +49,7 @@ builder.Services.AddScoped<ConfirmationState>();
 builder.Services.AddScoped<PriceConfirmationState>();
 builder.Services.AddScoped<CompletedState>();
 builder.Services.AddScoped<IGlobalCommandHandler, ResetCommandHandler>();
+builder.Services.AddScoped<IGlobalCommandHandler, OpenAIQuestionHandler>();
 
 // Database
 builder.Services.AddDbContext<BotDbContext>(options =>

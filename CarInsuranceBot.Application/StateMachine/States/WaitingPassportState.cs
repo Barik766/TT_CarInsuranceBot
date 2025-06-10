@@ -30,7 +30,7 @@ namespace CarInsuranceBot.Application.StateMachine.States
             {
                 if (update.Message?.Photo == null)
                 {
-                    await _telegramService.SendTextMessageAsync(session.ChatId, "Пожалуйста, отправьте фото паспорта.", cancellationToken);
+                    await _telegramService.SendTextMessageAsync(session.ChatId, "Please send a photo of your passport.", cancellationToken);
                     return ConversationState.WaitingPassport;
                 }
 
