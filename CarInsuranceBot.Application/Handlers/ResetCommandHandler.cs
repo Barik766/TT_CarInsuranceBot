@@ -25,7 +25,7 @@ namespace CarInsuranceBot.Application.Handlers
             {
                 await _stateManager.ClearSessionAsync(session.ChatId, cancellationToken);
 
-                session.CurrentState = ConversationState.Start;
+                session.CurrentState = ConversationState.WaitingPassport;
 
                 await _telegramService.SendTextMessageAsync(session.ChatId,
                     "✅ Your status has been successfully reset. Let's start over. Please send your passport data",
